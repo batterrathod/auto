@@ -1,17 +1,17 @@
-name: IVR Lead Bot (15 Min)
+name: IVR Lead Bot (Infinite Mode)
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 minutes
-  workflow_dispatch:        # manual trigger
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 360   # 6 hours max (GitHub limit)
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -20,16 +20,9 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm install
+          npx puppeteer browsers install chrome
 
-      - name: Run Puppeteer Bot
-        env:
-          LOGIN_URL: ${{ secrets.LOGIN_URL }}
-          DATA_URL: ${{ secrets.DATA_URL }}
-          EMAIL: ${{ secrets.EMAIL }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-        run: node bot.js
+      - name: Run Lead Bot
+        run: node auto.js
