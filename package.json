@@ -1,0 +1,25 @@
+{
+  "name": "auto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "auto.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/batterrathod/auto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/batterrathod/auto/issues"
+  },
+  "homepage": "https://github.com/batterrathod/auto#readme",
+  "dependencies": {
+    "mysql2": "^3.16.3",
+    "puppeteer": "^24.37.2"
+  }
+}
