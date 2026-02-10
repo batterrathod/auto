@@ -40,10 +40,7 @@ async function getStats() {
         };
 
     } catch (err) {
-        return {
-            total: 0,
-            today: 0
-        };
+        return { total: 0, today: 0 };
     }
 }
 
@@ -65,12 +62,11 @@ async function insertRows(rows) {
     if (!rows || rows.length === 0) return 0;
 
     const now = new Date();
-
     const values = [];
 
     for (const r of rows) {
 
-        if (!r[3]) continue; // skip if number missing
+        if (!r[3]) continue;
 
         values.push([
             r[0] || null,
@@ -88,7 +84,6 @@ async function insertRows(rows) {
     if (values.length === 0) return 0;
 
     try {
-
         const [result] = await pool.query(
             `INSERT IGNORE INTO ivr_logs
             (sn, full_name, moneyview_msg, number, pan_card, salary, dob, created, captured_at)
@@ -112,24 +107,33 @@ process.on("unhandledRejection", err => {
 (async () => {
 
     const browser = await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        headless: "new",
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu"
+        ]
     });
 
     const page = await browser.newPage();
-    page.setDefaultTimeout(90000);
+
+    // Increased navigation timeout
+    page.setDefaultNavigationTimeout(180000);
+    page.setDefaultTimeout(180000);
 
     async function login() {
         await page.goto(LOGIN_URL, {
-            waitUntil: "networkidle2"
+            waitUntil: "domcontentloaded"
         });
+
         await page.type('input[name="email"]', EMAIL);
         await page.type('input[name="password"]', PASSWORD);
 
         await Promise.all([
             page.click('button[type="submit"]'),
             page.waitForNavigation({
-                waitUntil: "networkidle2"
+                waitUntil: "domcontentloaded"
             })
         ]);
 
@@ -137,8 +141,9 @@ process.on("unhandledRejection", err => {
     }
 
     await login();
+
     await page.goto(DATA_URL, {
-        waitUntil: "networkidle2"
+        waitUntil: "domcontentloaded"
     });
 
     while (true) {
@@ -146,20 +151,19 @@ process.on("unhandledRejection", err => {
         try {
 
             await page.reload({
-                waitUntil: "networkidle2"
+                waitUntil: "domcontentloaded"
             });
 
-            // Check if session expired
             if (page.url().includes("login")) {
                 console.log("Session expired. Re-logging...");
                 await login();
                 await page.goto(DATA_URL, {
-                    waitUntil: "networkidle2"
+                    waitUntil: "domcontentloaded"
                 });
             }
 
             await page.waitForSelector("tbody tr", {
-                timeout: 30000
+                timeout: 60000
             });
 
             const rows = await page.evaluate(() => {
